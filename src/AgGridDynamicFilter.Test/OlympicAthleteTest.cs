@@ -14,19 +14,25 @@ namespace AgGridDynamicFilter.Test
 {
     public partial class OlympicAthleteTest
     {
+        private static IEnumerable<OlympicWinner> olympicWinners;
 
-        public static async Task<IEnumerable<OlympicWinner>> GetAndFilterAndSort(AgGridPaginationFilterModel filter)
+        
+        public OlympicAthleteTest()
         {
-            var allWinners = await DataLoader.GetOlympicWinners();
+            //Task.Run(()=> DataLoader.GetOlympicWinnersRemote()).Wait();
+            olympicWinners = DataLoader.GetOlympicWinnersFromFile();
+        }
 
+        public static IEnumerable<OlympicWinner> GetAndFilterAndSort(AgGridPaginationFilterModel filter)
+        {
             var expression = Extensions.Extensions.GetExpression<OlympicWinner, AgGridPaginationFilterModel>(filter);
 
-            return allWinners.Where(expression.Compile()).DynamicOrderBy(filter);
+            return olympicWinners.Where(expression.Compile()).DynamicOrderBy(filter);
         }
 
         [Theory]
         [MemberData(nameof(AgeFilterAgeSort))]
-        public async Task OlympicWinnersApi_GivenGetList_WhenFilterByAge_SortByAge_ThenResultBW18And26SortByAge(int startRow, int endRow, List<SortModel> sortModel, Dictionary<string, FilterModel> filterModel)
+        public void OlympicWinnersApi_GivenGetList_WhenFilterByAge_SortByAge_ThenResultBW18And26SortByAge(int startRow, int endRow, List<SortModel> sortModel, Dictionary<string, FilterModel> filterModel)
         {
             var filter = new AgGridPaginationFilterModel
             {
@@ -36,7 +42,7 @@ namespace AgGridDynamicFilter.Test
                 SortModel = sortModel,
             };
 
-            var filteredWinners = await GetAndFilterAndSort(filter);
+            var filteredWinners = GetAndFilterAndSort(filter);
 
             Assert.True(filteredWinners.Max(e => e.Age) <= 26 && filteredWinners.Min(e => e.Age) >= 18);
             Assert.DoesNotContain(filteredWinners
@@ -52,7 +58,7 @@ namespace AgGridDynamicFilter.Test
 
         [Theory]
         [MemberData(nameof(AgeAndCountryFilterNameSort))]
-        public async Task OlympicWinnersApi_GivenGetList_WhenFilterByAgeAndCountry_SortByCountry_ThenResultFromIranAndIraqAndSortByName(int startRow, int endRow, List<SortModel> sortModel, Dictionary<string, FilterModel> filterModel)
+        public void OlympicWinnersApi_GivenGetList_WhenFilterByAgeAndCountry_SortByCountry_ThenResultFromIranAndIraqAndSortByName(int startRow, int endRow, List<SortModel> sortModel, Dictionary<string, FilterModel> filterModel)
         {
             var filter = new AgGridPaginationFilterModel
             {
@@ -61,8 +67,8 @@ namespace AgGridDynamicFilter.Test
                 FilterModel = filterModel,
                 SortModel = sortModel,
             };
- 
-            var filteredWinners = await GetAndFilterAndSort(filter);
+
+            var filteredWinners = GetAndFilterAndSort(filter);
 
             Assert.True(filteredWinners.Max(e => e.Age) <= 52 && filteredWinners.Min(e => e.Age) >= 23);
             Assert.DoesNotContain(filteredWinners, e => e.Country != "Iran" && e.Country != "Iraq");
