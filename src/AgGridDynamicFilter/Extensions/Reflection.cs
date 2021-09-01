@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace AgGridDynamicFilter.Extensions
+namespace AgGridDynamicFilter
 {
     public static partial class Extensions
     {

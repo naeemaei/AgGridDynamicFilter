@@ -1,13 +1,9 @@
-using AgGridDynamicFilter.Enums;
-using AgGridDynamicFilter.Extensions;
 using AgGridDynamicFilter.Models;
 using AgGridDynamicFilter.SampleData;
 using AgGridDynamicFilter.SampleData.Models;
-using AgGridDynamicFilter.Test.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace AgGridDynamicFilter.Test
@@ -25,7 +21,7 @@ namespace AgGridDynamicFilter.Test
 
         public static IEnumerable<OlympicWinner> GetAndFilterAndSort(AgGridPaginationFilterModel filter)
         {
-            var expression = Extensions.Extensions.GetExpression<OlympicWinner, AgGridPaginationFilterModel>(filter);
+            var expression = Extensions.GetExpression<OlympicWinner, AgGridPaginationFilterModel>(filter);
 
             return olympicWinners.Where(expression.Compile()).DynamicOrderBy(filter);
         }

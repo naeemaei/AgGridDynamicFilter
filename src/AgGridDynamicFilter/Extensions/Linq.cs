@@ -5,7 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace AgGridDynamicFilter.Extensions
+namespace AgGridDynamicFilter
 {
     public static partial class Extensions
     {
