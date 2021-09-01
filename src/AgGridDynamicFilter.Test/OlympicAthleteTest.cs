@@ -10,8 +10,8 @@ namespace AgGridDynamicFilter.Test
 {
     public partial class OlympicAthleteTest
     {
-        private static IEnumerable<OlympicWinner> olympicWinners;
 
+        private static IEnumerable<OlympicWinner> olympicWinners;
         
         public OlympicAthleteTest()
         {

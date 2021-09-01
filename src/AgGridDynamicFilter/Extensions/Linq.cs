@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -88,28 +89,15 @@ namespace AgGridDynamicFilter
 
         public static IQueryable<TEntity> OrderByProperty<TEntity>(this IQueryable<TEntity> source, string orderType = "asc", params PropertyInfo[] properties)
         {
-            if (typeof(TEntity).GetProperty(properties[0].Name, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance) == null)
-            {
-                return null;
-            }
+            var (genericMethod, lambda) = GetOrderByMethod<TEntity, IQueryable>(orderType, properties);
 
-            ParameterExpression parameterExpression = Expression.Parameter(typeof(TEntity), "t");
-            Expression orderByProperty = parameterExpression;
-
-            foreach (var item in properties)
-            {
-                orderByProperty = Expression.Property(orderByProperty, item);
-            }
-
-            LambdaExpression lambda = Expression.Lambda(orderByProperty, parameterExpression);
-            MethodInfo genericMethod = orderType == "asc" ? QueryableOrderByMethod.MakeGenericMethod(typeof(TEntity), orderByProperty.Type) : QueryableOrderByDescendingMethod.MakeGenericMethod(typeof(TEntity), orderByProperty.Type);
             object ret = genericMethod.Invoke(null, new object[] { source, lambda });
             return (IQueryable<TEntity>)ret;
         }
 
         public static IEnumerable<TEntity> OrderByProperty<TEntity>(this IEnumerable<TEntity> source, string orderType = "asc", params PropertyInfo[] properties)
         {
-            var (genericMethod, lambda) = GetOrderByMethod<TEntity>(orderType, properties);
+            var (genericMethod, lambda) = GetOrderByMethod<TEntity, IEnumerable>(orderType, properties);
             object ret = genericMethod.Invoke(null, new object[] { source, lambda.Compile() });
             return (IEnumerable<TEntity>)ret;
         }
@@ -138,7 +126,7 @@ namespace AgGridDynamicFilter
             return body;
         }
 
-        private static (MethodInfo, LambdaExpression) GetOrderByMethod<TEntity>(string orderType = "asc", params PropertyInfo[] properties)
+        private static (MethodInfo, LambdaExpression) GetOrderByMethod<TEntity,TType>(string orderType = "asc", params PropertyInfo[] properties)
         {
             if (typeof(TEntity).GetProperty(properties[0].Name, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance) == null)
             {
@@ -153,8 +141,16 @@ namespace AgGridDynamicFilter
                 orderByProperty = Expression.Property(orderByProperty, item);
             }
 
+            MethodInfo genericMethod = null;
+            if(typeof(TType) == typeof(IEnumerable))
+            {
+                genericMethod = orderType == "asc" ? EnumerableOrderByMethod.MakeGenericMethod(typeof(TEntity), orderByProperty.Type) : EnumerableOrderByDescendingMethod.MakeGenericMethod(typeof(TEntity), orderByProperty.Type);
+
+            }
+            else
+                genericMethod = orderType == "asc" ? QueryableOrderByMethod.MakeGenericMethod(typeof(TEntity), orderByProperty.Type) : QueryableOrderByDescendingMethod.MakeGenericMethod(typeof(TEntity), orderByProperty.Type);
+
             LambdaExpression lambda = Expression.Lambda(orderByProperty, parameterExpression);
-            MethodInfo genericMethod = orderType == "asc" ? EnumerableOrderByMethod.MakeGenericMethod(typeof(TEntity), orderByProperty.Type) : EnumerableOrderByDescendingMethod.MakeGenericMethod(typeof(TEntity), orderByProperty.Type);
             return (genericMethod, lambda);
         }
 

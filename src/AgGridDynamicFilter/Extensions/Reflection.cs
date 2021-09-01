@@ -30,7 +30,7 @@ namespace AgGridDynamicFilter
 
         public static PropertyInfo GetPublicPropertyFromCache(this Type type, string propertyName)
         {
-            return type.GetPublicPropertiesFromCache().SingleOrDefault(e => e.Name.ToLower() == propertyName.ToLower());
+            return type.GetPublicPropertiesFromCache().SingleOrDefault(e=> string.Equals(e.Name, propertyName, StringComparison.OrdinalIgnoreCase));
         }
 
         public static List<PropertyInfo> GetPublicProperties(this Type type)

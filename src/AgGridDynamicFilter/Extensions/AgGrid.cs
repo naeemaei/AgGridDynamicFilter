@@ -41,7 +41,7 @@ namespace AgGridDynamicFilter
             }
 
             else
-                expression = AddPredicate<TEntity>(values.Type.ToLower(), ChangeType(values.Filter, properties[properties.Length - 1].PropertyType), properties.ToArray());
+                expression = AddPredicate<TEntity>(values.Type, ChangeType(values.Filter, properties[properties.Length - 1].PropertyType), properties.ToArray());
 
             return expression;
         }
@@ -57,20 +57,7 @@ namespace AgGridDynamicFilter
                 foreach (var item in GetOrderByItems<TEntity, TQuery>(request))
                 {
                     query = query.OrderByProperty(item.Item1, item.Item2);
-                }
-
-                //foreach (var item in filteringModel.SortModel)
-                //{
-                //    var domainProperty = entityProperties?.Where(e => string.Equals(e.Name, item.ColId, StringComparison.OrdinalIgnoreCase))?.SingleOrDefault();
-                //    var properties = FindDomainProperties(entityProperties, subPropNames, item.ColId);
-
-
-                //    if (properties is null || properties.Count == 0)
-                //        continue;
-
-                //    query = query.OrderByProperty(item.Sort, properties.ToArray());
-
-                //}
+                } 
             }
 
             return query;
@@ -165,7 +152,7 @@ namespace AgGridDynamicFilter
                         condition1Expression = CreateCondition<TEntity>(values.Condition1, properties.ToArray());
                         condition2Expression = CreateCondition<TEntity>(values.Condition2, properties.ToArray());
 
-                        if (values?.Operator?.ToLower() == "or")
+                        if (string.Equals(values?.Operator, "or", StringComparison.OrdinalIgnoreCase))
                             expression = condition1Expression.OrElse(condition2Expression);
                         else
                             expression = condition1Expression.AndAlso(condition2Expression);
